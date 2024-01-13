@@ -1,5 +1,5 @@
 from vts_coder import VtsCoder
-import plotly.express as px
+#import plotly.express as px
 from pyvis.network import Network
 
 f = open(file="mission/01 - Resolution.vts")
