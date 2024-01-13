@@ -5,9 +5,6 @@ class VtsCoder():
     def decode(vts_text):
         result = dict()
 
-        ## What if we just parse all as list?
-        ## TODO
-
         # Prime result structure
         result["CustomScenario"] = dict()
         result["CustomScenario"]["UNITS"] = list()
@@ -215,7 +212,26 @@ class VtsCoder():
             
 
         # Decode ConditionalActions list
-            
+        target = vts_split["ConditionalActions"]
+        for base_action in target.split("ConditionalAction{"):
+            if base_action.strip() != "{":
+                generic_info = base_action.split("BASE_BLOCK{")[0]
+                block_info = base_action.split("BASE_BLOCK{")[1].split("CONDITIONAL")[0]
+                conditional_text = base_action.split("CONDITIONAL{")[1].split("ACTIONS")[0]
+                actions_text = base_action.split("ACTIONS{")[1].split("ELSE_ACTIONS")[0]
+                else_text = base_action.split("ELSE_ACTIONS{")[1]
+
+                temp_struct = VtsCoder.decode_recursive("Info"+generic_info+"\n"+block_info+"}}")
+                if "Info" in temp_struct:
+                    temp_struct = temp_struct["Info"]
+                elem_struct = temp_struct
+
+                elem_struct["actions"] = VtsCoder.parse_event(actions_text)
+                elem_struct["else_actions"] = VtsCoder.parse_event(else_text)
+
+                if elem_struct != {"EventInfo_list":[]}:
+                    result["CustomScenario"]["ConditionalActions"].append(elem_struct)
+    
 
         # Decode EventSequences list
         target = vts_split["EventSequences"]
@@ -360,7 +376,7 @@ class VtsCoder():
 
 
 
-"""
+#"""
 import json
 
 f = open(file="mission/01 - Resolution.vts")
