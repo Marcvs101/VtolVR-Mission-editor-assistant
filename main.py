@@ -467,9 +467,16 @@ for event_id in trigger_event_dict:
         net.add_edge("t"+event_id,"t"+target,arrows="to",color="#7f7f00",title="enable")
 
     for target in event_struct["timed_events_stop"]:
-        net.add_edge("t"+event_id,"tt"+target,arrows="to",color="#555555",title="disable")
+        net.add_edge("t"+event_id,"tt"+target,arrows="to",color="#555555",title="stop")
     for target in event_struct["timed_events_start"]:
-        net.add_edge("t"+event_id,"tt"+target,arrows="to",color="#7f7f00",title="enable")    
+        net.add_edge("t"+event_id,"tt"+target,arrows="to",color="#7f7f00",title="start")    
+
+    for target in event_struct["event_sequences_stop"]:
+        net.add_edge("t"+event_id,"es"+target,arrows="to",color="#555555",title="stop")
+    for target in event_struct["event_sequences_start"]:
+        net.add_edge("t"+event_id,"es"+target,arrows="to",color="#7f7f00",title="start")    
+    for target in event_struct["event_sequences_restart"]:
+        net.add_edge("t"+event_id,"es"+target,arrows="to,middle",color="#7f7f00",title="restart")    
 
     for target in event_struct["objectives_begin"]:
         net.add_edge("t"+event_id,"o"+target,arrows="to",color="#7f7f7f",title="begin")
@@ -492,9 +499,16 @@ for event_id in timed_event_dict:
         net.add_edge("tt"+event_id,"t"+target,arrows="to",color="#7f7f00",title="enable")
 
     for target in event_struct["timed_events_stop"]:
-        net.add_edge("tt"+event_id,"tt"+target,arrows="to",color="#555555",title="disable")
+        net.add_edge("tt"+event_id,"tt"+target,arrows="to",color="#555555",title="stop")
     for target in event_struct["timed_events_start"]:
-        net.add_edge("tt"+event_id,"tt"+target,arrows="to",color="#7f7f00",title="enable")
+        net.add_edge("tt"+event_id,"tt"+target,arrows="to",color="#7f7f00",title="start")
+
+    for target in event_struct["event_sequences_stop"]:
+        net.add_edge("tt"+event_id,"es"+target,arrows="to",color="#555555",title="stop")
+    for target in event_struct["event_sequences_start"]:
+        net.add_edge("tt"+event_id,"es"+target,arrows="to",color="#7f7f00",title="start")    
+    for target in event_struct["event_sequences_restart"]:
+        net.add_edge("tt"+event_id,"es"+target,arrows="to,middle",color="#7f7f00",title="restart")    
 
     for target in event_struct["objectives_begin"]:
         net.add_edge("tt"+event_id,"o"+target,arrows="to",color="#7f7f7f",title="begin")
@@ -531,9 +545,16 @@ for event_id in event_sequence_nodes_dict:
         net.add_edge("esn"+event_id,"t"+target,arrows="to",color="#7f7f00",title="enable")
 
     for target in event_struct["timed_events_stop"]:
-        net.add_edge("esn"+event_id,"tt"+target,arrows="to",color="#555555",title="disable")
+        net.add_edge("esn"+event_id,"tt"+target,arrows="to",color="#555555",title="stop")
     for target in event_struct["timed_events_start"]:
-        net.add_edge("esn"+event_id,"tt"+target,arrows="to",color="#7f7f00",title="enable")
+        net.add_edge("esn"+event_id,"tt"+target,arrows="to",color="#7f7f00",title="start")
+
+    for target in event_struct["event_sequences_stop"]:
+        net.add_edge("esn"+event_id,"es"+target,arrows="to",color="#555555",title="stop")
+    for target in event_struct["event_sequences_start"]:
+        net.add_edge("esn"+event_id,"es"+target,arrows="to",color="#7f7f00",title="start")    
+    for target in event_struct["event_sequences_restart"]:
+        net.add_edge("esn"+event_id,"es"+target,arrows="to,middle",color="#7f7f00",title="restart")    
 
     for target in event_struct["objectives_begin"]:
         net.add_edge("esn"+event_id,"o"+target,arrows="to",color="#7f7f7f",title="begin")
