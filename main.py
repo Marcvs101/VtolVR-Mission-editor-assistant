@@ -8,12 +8,23 @@ f.close()
 
 mission_dict = VtsCoder.decode(mission_file)["CustomScenario"]
 
-# Get units and coordinates
+
+
+
+
+# Plot units and coordinates
 unit_dict = dict()
 for unit in mission_dict["UNITS"]:
     unit_struct = dict()
     unit_struct["name"] = unit["unitName"]
     unit_struct["allied"] = ("allied" in unit["unitID"].lower())
+    unit_struct["spawn_on_start"] = True
+    if "spawnOnStart" in unit["UnitFields"]:
+        unit_struct["spawn_on_start"] = unit["UnitFields"]["spawnOnStart"]=="True"
+    unit_struct["group"] = ""
+    if "unitGroup" in unit["UnitFields"]:
+        unit_struct["group"] = unit["UnitFields"]["unitGroup"]
+
     text_coords = unit["lastValidPlacement"].replace("(","").replace(")","").split(",")
     unit_struct["x"] = float(text_coords[0].strip())
     unit_struct["y"] = float(text_coords[1].strip())
@@ -28,13 +39,13 @@ fig = px.scatter(text=[i["name"] for i in unit_dict.values()],
                  color=[i["allied"] for i in unit_dict.values()]
                 )
 fig.show()
-"""
+#"""
 
 
 
 
 
-# Get Event Graph
+# Plot Event Graph
 net = Network(height="930px",width="100%",directed=True)
 
 
@@ -543,10 +554,6 @@ for event in mission_dict["ConditionalActions"]:
 
 
 
-
-
-
-
 # build links from objectives
 for objective_id in objective_dict:
     objective_struct = objective_dict[objective_id]
@@ -866,8 +873,59 @@ for event_id in conditional_event_dict:
 
 
 
-
-
-
 net.set_edge_smooth('dynamic')
 net.show("mission.html", notebook=False)
+
+
+
+
+
+# Check objective to spawn coherence
+objective_to_units = dict()
+objective_id_to_name = dict()
+for objective in mission_dict["OBJECTIVES"]:
+    if objective["objectiveType"] == "Destroy" or objective["objectiveType"] == "Pick_Up" or objective["objectiveType"] == "Drop_Off":
+        objective_id_to_name[objective["objectiveID"]] = objective["objectiveName"]
+        unit_list = list()
+        for target in objective["fields"]["targets"].split(";"):
+            if target != "":
+                unit_list.append(target)
+
+        objective_to_units[objective["objectiveID"]] = unit_list
+
+
+objective_to_unit_groups = dict()
+unit_to_group = dict()
+unit_id_to_name = dict()
+units_spawn_start = set()
+for objective_id in objective_to_units:
+    objective_to_unit_groups[objective_id] = list()
+    for unit_id in objective_to_units[objective_id]:
+        unit_struct = unit_dict[unit_id]
+
+        unit_id_to_name[unit_id] = unit_struct["name"]
+
+        if unit_struct["spawn_on_start"] == True:
+            units_spawn_start.add(unit_id)
+
+        if unit_struct["group"] != "":
+            unit_to_group[unit_id] = unit_struct["group"]
+            objective_to_unit_groups[objective_id].append(unit_struct["group"])
+
+
+f = open(file="Objective to unit spawn.txt",mode="w",encoding="utf-8")
+for objective_id in objective_to_units:
+    f.write("# "+objective_id_to_name[objective_id]+" ("+str(objective_id)+")\n")
+    for unit_id in objective_to_units[objective_id]:
+        if unit_id in unit_to_group:
+            if unit_id in units_spawn_start:
+                f.write("- "+unit_id_to_name[unit_id]+" ("+str(unit_id)+") \t group: "+unit_to_group[unit_id]+" \t spawn on start \n")
+            else:
+                f.write("- "+unit_id_to_name[unit_id]+" ("+str(unit_id)+") \t group: "+unit_to_group[unit_id]+" \t NEED TRIGGER! \n")
+        else:
+            if unit_id in units_spawn_start:
+                f.write("- "+unit_id_to_name[unit_id]+" ("+str(unit_id)+") \t NO GROUP! \t spawn on start \n")
+            else:
+                f.write("- "+unit_id_to_name[unit_id]+" ("+str(unit_id)+") \t NO GROUP! \t NEED TRIGGER! \n")
+    f.write("\n")
+f.close()
